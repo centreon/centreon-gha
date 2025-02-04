@@ -1,7 +1,7 @@
 post:
   tags:
     - Host group
-  summary: "Delete multiple host groups"
+  summary: "Duplicate multiple host groups"
   requestBody:
     required: true
     content:
@@ -13,15 +13,20 @@ post:
               type: array
               items:
                 type: integer
-              description: "List of host group IDs to delete"
+              description: "List of host group IDs to duplicate"
               example: [ 1, 2 ]
+            nb_duplicates:
+              type: integer
+              description: "Number of duplicates to create"
+              example: 3
           required:
             - ids
+            - nb_duplicates
   description: |
-    Delete multiple host groups from configuration
+    Duplicate multiple host groups from configuration
   responses:
-    '200':
-      description: "Objects deleted"
+    '204':
+      description: "Objects duplicated"
       content:
         application/json:
           schema:
@@ -32,10 +37,11 @@ post:
                 href:
                   type: string
                   format: uri
-                  description: "URI to the deleted host group"
+                  description: "URI to the duplicated host group"
                 status:
                   type: integer
                   description: "HTTP Status Code of the operation"
+                  example: 204
                 message:
                   type: string
                   nullable: true
@@ -44,5 +50,7 @@ post:
       $ref: '../../Common/Response/Unauthorized.yaml'
     '403':
       $ref: '../../Common/Response/Forbidden.yaml'
+    '404':
+      $ref: '../../Common/Response/NotFound.yaml'
     '500':
       $ref: '../../Common/Response/InternalServerError.yaml'
