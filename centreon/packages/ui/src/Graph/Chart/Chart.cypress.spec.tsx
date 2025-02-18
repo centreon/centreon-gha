@@ -19,7 +19,10 @@ import { LineChartProps } from './models';
 import WrapperChart from '.';
 
 interface Props
-  extends Pick<LineChartProps, 'legend' | 'tooltip' | 'axis' | 'lineStyle'> {
+  extends Pick<
+    LineChartProps,
+    'legend' | 'tooltip' | 'axis' | 'lineStyle' | 'barStyle'
+  > {
   data?: LineChartData;
 }
 
@@ -63,7 +66,8 @@ const initialize = ({
   tooltip,
   legend,
   axis,
-  lineStyle
+  lineStyle,
+  barStyle
 }: Props): void => {
   cy.adjustViewport();
 
@@ -84,6 +88,7 @@ const initialize = ({
           data={data as unknown as LineChartData}
           legend={legend}
           lineStyle={lineStyle}
+          barStyle={barStyle}
           tooltip={tooltip}
         />
       </Provider>
@@ -135,7 +140,7 @@ const checkGraphWidth = (): void => {
 
   cy.findByTestId('graph-interaction-zone')
     .should('have.attr', 'height')
-    .and('equal', '393');
+    .and('equal', '381.203125');
 };
 
 describe('Line chart', () => {
@@ -446,7 +451,7 @@ describe('Line chart', () => {
 
       cy.contains(':00 AM').should('be.visible');
 
-      cy.get('text[transform="rotate(-35, -2, 312.508173777963)"]').should(
+      cy.get('text[transform="rotate(-35, -2, 127.45721914353263)"]').should(
         'be.visible'
       );
 
@@ -528,8 +533,8 @@ describe('Line chart', () => {
 
       checkGraphWidth();
       cy.contains(':00 AM').should('be.visible');
-      cy.get('circle[cx="4.0625"]').should('be.visible');
-      cy.get('circle[cy="105.21757370835121"]').should('be.visible');
+      cy.get('circle[cx="142.1875"]').should('be.visible');
+      cy.get('circle[cy="54.741287790283614"]').should('be.visible');
 
       cy.makeSnapshot();
     });
@@ -556,7 +561,7 @@ describe('Line chart', () => {
         .and('equals', '4 10');
     });
 
-    it('displays lines with dots width when the prop is set', () => {
+    it('displays lines with dashes width when props are set', () => {
       initialize({ lineStyle: { dashLength: 5, dashOffset: 8 } });
 
       checkGraphWidth();
@@ -565,6 +570,31 @@ describe('Line chart', () => {
       cy.get('path[stroke-width="2"]')
         .should('have.attr', 'stroke-dasharray')
         .and('equals', '5 8');
+    });
+
+    it('displays only one line with custom style when props are set', () => {
+      initialize({
+        lineStyle: [
+          {
+            dashLength: 5,
+            dashOffset: 4,
+            lineWidth: 1,
+            showPoints: true,
+            showArea: true,
+            metricId: 13534
+          }
+        ]
+      });
+
+      checkGraphWidth();
+
+      cy.contains(':00 AM').should('be.visible');
+      cy.get('path.visx-area-closed')
+        .should('have.attr', 'stroke-dasharray')
+        .and('equals', '5 4');
+      cy.get('circle[cx="32.5"]').should('be.visible');
+
+      cy.makeSnapshot();
     });
   });
 });
@@ -691,6 +721,38 @@ describe('Lines and bars', () => {
 
     cy.findAllByTestId('unit-selector').eq(1).should('have.value', '%');
     cy.contains('20').should('be.visible');
+
+    cy.makeSnapshot();
+  });
+
+  it('displays stacked lines and bars when a line and a bar are customized', () => {
+    initialize({
+      data: dataPingServiceLinesBarsStacked,
+      lineStyle: [
+        {
+          metricId: 1,
+          showArea: false,
+          dotOffset: 4,
+          lineWidth: 3
+        }
+      ],
+      barStyle: [
+        {
+          metricId: 10,
+          opacity: 0.5,
+          radius: 0.3
+        }
+      ]
+    });
+
+    checkGraphWidth();
+
+    cy.get(
+      'path[d="M7.4462809917355415,258.14769191745177 h56.016528925619824 h1v1 v121.05543308254823 a1,1 0 0 1 -1,1 h-56.016528925619824 a1,1 0 0 1 -1,-1 v-121.05543308254823 v-1h1z"]'
+    ).should('be.visible');
+    cy.get(
+      'path[d="M23.85123966942149,127.04534956949817 h23.20661157024793 a17.404958677685947,17.404958677685947 0 0 1 17.404958677685947,17.404958677685947 v96.2924249925817 v17.404958677685947h-17.404958677685947 h-23.20661157024793 h-17.404958677685947v-17.404958677685947 v-96.2924249925817 a17.404958677685947,17.404958677685947 0 0 1 17.404958677685947,-17.404958677685947z"]'
+    ).should('be.visible');
 
     cy.makeSnapshot();
   });

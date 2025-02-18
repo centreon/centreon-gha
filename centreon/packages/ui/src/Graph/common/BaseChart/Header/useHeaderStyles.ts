@@ -5,5 +5,9 @@ export const ussHeaderChartStyles = makeStyles()({
     display: 'grid',
     gridTemplateColumns: '0.4fr 1fr 0.4fr',
     width: '100%'
+  },
+  title: {
+    whiteSpace: 'pre-wrap',
+    lineHeight: '1.2'
   }
 });
