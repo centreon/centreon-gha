@@ -22,15 +22,14 @@ declare(strict_types=1);
 
 namespace Centreon\Domain\Repository;
 
-use Core\Security\AccessGroup\Domain\Model\AccessGroup;
+use Adaptation\Database\Connection\ConnectionInterface;
 use Centreon\Infrastructure\DatabaseConnection;
+use Core\Security\AccessGroup\Domain\Model\AccessGroup;
 
 class AbstractRepositoryDRB
 {
-    /**
-     * @var DatabaseConnection
-     */
-    protected $db;
+    /** @var DatabaseConnection */
+    protected ConnectionInterface $db;
 
     /**
      * Replace all instances of :dbstg and :db by the real db names.
