@@ -114,7 +114,7 @@ final class FindResourcesByParent
                 }
             }
 
-            // Set total to the number of children found 
+            // Set total to the number of children found
             $this->requestParameters->setTotal($totalChildrenFound);
 
             // Restore search and sort from initial request (for accurate meta in presenter).
@@ -160,6 +160,8 @@ final class FindResourcesByParent
     /**
      * @param ResourceFilter $filter
      *
+     * @throws \Throwable
+     *
      * @return FindResourcesResponse
      */
     private function findResourcesAsAdmin(ResourceFilter $filter): FindResourcesResponse
@@ -171,6 +173,8 @@ final class FindResourcesByParent
 
     /**
      * @param ResourceFilter $filter
+     *
+     * @throws \Throwable
      *
      * @return FindResourcesResponse
      */
