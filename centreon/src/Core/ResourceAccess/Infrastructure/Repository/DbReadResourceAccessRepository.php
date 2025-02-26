@@ -27,6 +27,7 @@ use Centreon\Domain\Log\LoggerTrait;
 use Centreon\Domain\RequestParameters\Interfaces\RequestParametersInterface;
 use Centreon\Infrastructure\DatabaseConnection;
 use Centreon\Infrastructure\RequestParameters\SqlRequestParametersTranslator;
+use Core\Common\Domain\SimpleEntity;
 use Core\Common\Infrastructure\Repository\AbstractRepositoryRDB;
 use Core\ResourceAccess\Application\Repository\ReadResourceAccessRepositoryInterface;
 use Core\ResourceAccess\Domain\Model\DatasetFilter\DatasetFilter;
@@ -256,6 +257,44 @@ final class DbReadResourceAccessRepository extends AbstractRepositoryRDB impleme
         }
 
         return $datasetFilters;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findRuleByResourceId(string $type, int $resourceId): array
+    {
+        $statement = $this->db->prepare($this->translateDbName(
+            <<<SQL
+                    SELECT
+                        acl_groups.acl_group_id AS `id`,
+                        acl_groups.acl_group_name AS `name`,
+                        acl_groups.cloud_description AS `description`,
+                        acl_groups.acl_group_activate AS `is_enabled`
+                    FROM `:db`.acl_groups
+                    INNER JOIN `:db`.dataset_filters
+                        ON dataset_filters.acl_group_id = acl_groups.acl_group_id
+                        AND type = :type
+                        AND (
+                            dataset_filters.resource_ids = ''
+                            OR dataset_filters.resource_ids REGEXP('(^|,)({$resourceId})(,|$)')
+                        )
+                    WHERE acl_groups.cloud_specific = 1
+                SQL
+        ));
+
+        $statement->bindValue(':type', $type, \PDO::PARAM_STR);
+        // $statement->bindValue(':resourceId', $resourceId, \PDO::PARAM_INT);
+        $statement->execute();
+
+        $rules = [];
+
+        foreach ($statement as $data) {
+            /** @var _TinyRule $data */
+            $rules[] = $this->createTinyRuleFromArray($data);
+        }
+
+        return $rules;
     }
 
     /**

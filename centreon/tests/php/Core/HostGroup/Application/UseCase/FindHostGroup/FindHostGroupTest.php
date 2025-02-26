@@ -31,8 +31,8 @@ use Core\Application\Common\UseCase\NotFoundResponse;
 use Core\Domain\Common\GeoCoords;
 use Core\HostGroup\Application\Exceptions\HostGroupException;
 use Core\HostGroup\Application\Repository\ReadHostGroupRepositoryInterface;
-use Core\HostGroup\Application\UseCase\FindHostGroup\FindHostGroup;
-use Core\HostGroup\Application\UseCase\FindHostGroup\FindHostGroupResponse;
+use Core\HostGroup\Application\UseCase\GetHostGroup\FindHostGroup;
+use Core\HostGroup\Application\UseCase\GetHostGroup\GetHostGroupResponse;
 use Core\HostGroup\Domain\Model\HostGroup;
 use Core\Infrastructure\Common\Api\DefaultPresenter;
 use Core\Infrastructure\Common\Presenter\PresenterFormatterInterface;
@@ -61,7 +61,7 @@ beforeEach(function (): void {
         true
     );
     $this->testedHostGroupResponse = (function () {
-        $response = new FindHostGroupResponse();
+        $response = new GetHostGroupResponse();
         $response->id = 1;
         $response->name = 'hg-name';
         $response->alias = 'hg-alias';
@@ -146,7 +146,7 @@ it(
 );
 
 it(
-    'should present a FindHostGroupResponse as admin',
+    'should present a GetHostGroupResponse as admin',
     function (): void {
         $this->contact
             ->expects($this->once())
@@ -160,14 +160,14 @@ it(
         ($this->useCase)(1, $this->presenter);
 
         expect($this->presenter->getPresentedData())
-            ->toBeInstanceOf(FindHostGroupResponse::class)
+            ->toBeInstanceOf(GetHostGroupResponse::class)
             ->and((array) $this->presenter->getPresentedData())
             ->toBe((array) $this->testedHostGroupResponse);
     }
 );
 
 it(
-    'should present a FindHostGroupResponse as allowed READ user',
+    'should present a GetHostGroupResponse as allowed READ user',
     function (): void {
         $this->contact
             ->expects($this->once())
@@ -190,14 +190,14 @@ it(
         ($this->useCase)(1, $this->presenter);
 
         expect($this->presenter->getPresentedData())
-            ->toBeInstanceOf(FindHostGroupResponse::class)
+            ->toBeInstanceOf(GetHostGroupResponse::class)
             ->and((array) $this->presenter->getPresentedData())
             ->toBe((array) $this->testedHostGroupResponse);
     }
 );
 
 it(
-    'should present a FindHostGroupResponse as allowed READ_WRITE user',
+    'should present a GetHostGroupResponse as allowed READ_WRITE user',
     function (): void {
         $this->contact
             ->expects($this->once())
@@ -220,7 +220,7 @@ it(
         ($this->useCase)(1, $this->presenter);
 
         expect($this->presenter->getPresentedData())
-            ->toBeInstanceOf(FindHostGroupResponse::class)
+            ->toBeInstanceOf(GetHostGroupResponse::class)
             ->and((array) $this->presenter->getPresentedData())
             ->toBe((array) $this->testedHostGroupResponse);
     }

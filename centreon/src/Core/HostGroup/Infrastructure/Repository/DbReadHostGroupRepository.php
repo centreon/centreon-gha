@@ -39,7 +39,6 @@ use Core\HostGroup\Application\Repository\ReadHostGroupRepositoryInterface;
 use Core\HostGroup\Domain\Model\HostGroup;
 use Core\HostGroup\Domain\Model\HostGroupNamesById;
 use Core\HostGroup\Domain\Model\HostGroupRelationCount;
-use Core\HostGroup\Domain\Model\HostsCountById;
 use Core\Security\AccessGroup\Domain\Model\AccessGroup;
 use Utility\SqlConcatenator;
 

@@ -78,4 +78,15 @@ interface ReadResourceAccessRepositoryInterface
      * @return array<int, array<int>> [datasetId => [ResourceId1,ResourceId2, ...]]
      */
     public function findDatasetResourceIdsByHostGroupId(int $hostGroupId): array;
+
+    /**
+     * Retrieve rules by host group ID.
+     *
+     * @param int $hostGroupId
+     *
+     * @throws \Throwable
+     *
+     * @return TinyRule[]
+     */
+    public function findRuleByResourceId(string $type, int $resourceId): array;
 }

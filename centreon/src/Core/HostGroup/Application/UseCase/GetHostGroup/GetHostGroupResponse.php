@@ -21,21 +21,33 @@
 
 declare(strict_types=1);
 
-namespace Tests\Core\HostGroup\Application\UseCase\FindHostGroup;
+namespace Core\HostGroup\Application\UseCase\GetHostGroup;
 
-use Core\Application\Common\UseCase\ResponseStatusInterface;
-use Core\HostGroup\Application\UseCase\GetHostGroup\FindHostGroupPresenterInterface;
-use Core\HostGroup\Application\UseCase\GetHostGroup\GetHostGroupResponse;
-use Core\Infrastructure\Common\Api\DefaultPresenter;
+use Core\Application\Common\UseCase\StandardResponseInterface;
+use Core\Common\Domain\SimpleEntity;
+use Core\HostGroup\Domain\Model\HostGroup;
+use Core\ResourceAccess\Domain\Model\TinyRule;
 
-class FindHostGroupTestPresenterStub extends DefaultPresenter implements FindHostGroupPresenterInterface
+final class GetHostGroupResponse implements StandardResponseInterface
 {
-    public function presentResponse(GetHostGroupResponse|ResponseStatusInterface $data): void
+    /**
+     * @param HostGroup $hostgroup
+     * @param SimpleEntity[]  $hosts
+     * @param TinyRule[] $rules
+     */
+    public function __construct(
+        readonly public HostGroup $hostgroup,
+        readonly public array $hosts = [],
+        readonly public array $rules = [],
+    )
     {
-        if ($data instanceof ResponseStatusInterface) {
-            $this->setResponseStatus($data);
-        } else {
-            $this->present($data);
-        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getData(): mixed
+    {
+        return $this;
     }
 }

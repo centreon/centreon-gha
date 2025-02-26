@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Core\HostGroup\Application\Repository;
 
 use Centreon\Domain\RequestParameters\Interfaces\RequestParametersInterface;
+use Core\Common\Domain\SimpleEntity;
 use Core\HostGroup\Domain\Model\HostGroup;
 use Core\HostGroup\Domain\Model\HostGroupNamesById;
 use Core\HostGroup\Domain\Model\HostGroupRelationCount;
