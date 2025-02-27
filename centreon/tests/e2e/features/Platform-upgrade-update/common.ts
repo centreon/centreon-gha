@@ -430,59 +430,92 @@ const insertResources = (): Cypress.Chainable => {
   return cy.wrap(Promise.all(files.map(insertFixture)));
 };
 
+const prepareUpdateFileForUpgrade = (): Cypress.Chainable => {
+  return cy.exec(`ls ../../www/install/php/ | grep -E 'Update.*next\\.php' || echo ""`)
+  .then((result) => {
+    const updateNextFile = result.stdout.trim();
+    if (!updateNextFile) {
+      cy.log("Update-next.php file not found");
+      return cy.wrap(null);
+    }
+
+    const updateNextFilePath = `../../www/install/php/${updateNextFile}`;
+
+    return cy.getWebVersion().then(({ major_version, minor_version }) => {
+      const targetUpdateFile = `/usr/share/centreon/www/install/php/Update-${major_version}.${minor_version}.php`;
+      // Copy the Update-next.php content to container with proper name
+      return cy.copyToContainer({
+        source: updateNextFilePath,
+        destination: targetUpdateFile,
+        type: CopyToContainerContentType.File
+      })
+      .then(() => {
+        // Change version in the file
+        return cy.execInContainer({
+          command: `sed -i 's/UPGRADE - next:/UPGRADE - ${major_version}.${minor_version}:/g' ${targetUpdateFile}`,
+          name: 'web'
+        });
+      });
+    });
+  });
+};
+
 When('administrator updates packages to current version', () => {
   updatePlatformPackages();
 });
 
 When('administrator runs the update procedure', () => {
-  cy.visit('/');
+  prepareUpdateFileForUpgrade()
+  .then(() => {
+    cy.visit('/');
 
-  cy.wait('@getStep1', { timeout: 60000 }).then(() => {
-    cy.get('.btc.bt_info').should('be.visible').click();
-  });
-
-  cy.wait('@getStep2').then(() => {
-    cy.get('span[style]').each(($span) => {
-      cy.wrap($span).should('have.text', 'Loaded');
+    cy.wait('@getStep1', { timeout: 60000 }).then(() => {
+      cy.get('.btc.bt_info').should('be.visible').click();
     });
-    cy.get('.btc.bt_info').should('be.visible').click();
-  });
 
-  cy.wait('@getStep3');
-  cy.contains('Release notes');
-  // check correct updated version
-  const installed_version = Cypress.env('installed_version');
-  cy.log(`installed_version : ${installed_version}`);
-
-  if (['testing', 'stable'].includes(Cypress.env('STABILITY'))) {
-    cy.getWebVersion().then(({ major_version, minor_version }) => {
-      cy.contains(
-        `upgraded from version ${installed_version} to ${major_version}.${minor_version}`
-      ).should('be.visible');
+    cy.wait('@getStep2').then(() => {
+      cy.get('span[style]').each(($span) => {
+        cy.wrap($span).should('have.text', 'Loaded');
+      });
+      cy.get('.btc.bt_info').should('be.visible').click();
     });
-  }
 
-  // button is disabled during 3s in order to read documentation
-  cy.get('#next', { timeout: 15000 }).should('be.enabled').click();
+    cy.wait('@getStep3');
+    cy.contains('Release notes');
+    // check correct updated version
+    const installed_version = Cypress.env('installed_version');
+    cy.log(`installed_version : ${installed_version}`);
 
-  cy.wait('@generatingCache')
-    .get('span[style]', { timeout: 15000 })
-    .each(($span) => {
-      cy.wrap($span).should('have.text', 'OK');
-    });
-  cy.get('.btc.bt_info', { timeout: 15000 }).should('be.visible').click();
-
-  cy.wait('@getStep5');
-  cy.contains('Congratulations');
-
-  // disable statistics if checkbox is available (only on upgrade to new major version)
-  cy.get('body').then(($body) => {
-    if ($body.find('#send_statistics').length) {
-      cy.get('#send_statistics').uncheck({ force: true });
+    if (['testing', 'stable'].includes(Cypress.env('STABILITY'))) {
+      cy.getWebVersion().then(({ major_version, minor_version }) => {
+        cy.contains(
+          `upgraded from version ${installed_version} to ${major_version}.${minor_version}`
+        ).should('be.visible');
+      });
     }
-  });
 
-  cy.get('.btc.bt_success').should('be.visible').click();
+    // button is disabled during 3s in order to read documentation
+    cy.get('#next', { timeout: 15000 }).should('be.enabled').click();
+
+    cy.wait('@generatingCache')
+      .get('span[style]', { timeout: 15000 })
+      .each(($span) => {
+        cy.wrap($span).should('have.text', 'OK');
+      });
+    cy.get('.btc.bt_info', { timeout: 15000 }).should('be.visible').click();
+
+    cy.wait('@getStep5');
+    cy.contains('Congratulations');
+
+    // disable statistics if checkbox is available (only on upgrade to new major version)
+    cy.get('body').then(($body) => {
+      if ($body.find('#send_statistics').length) {
+        cy.get('#send_statistics').uncheck({ force: true });
+      }
+    });
+
+    cy.get('.btc.bt_success').should('be.visible').click();
+  });
 });
 
 Then(
