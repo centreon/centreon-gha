@@ -1508,7 +1508,11 @@ function updateServiceHost_MCForCloud($serviceId = null)
 
 function updateServiceInDB($serviceId = null, $massiveChange = false, $parameters = [])
 {
-    global $isCloudPlatform;
+    global $isCloudPlatform, $form;
+
+    if (! count($parameters)) {
+        $parameters = $form->getSubmitValues();
+    }
 
     $isCloudPlatform
         ? updateServiceInDBForCloud($serviceId, $massiveChange, $parameters)
@@ -1656,16 +1660,15 @@ function updateServiceInDBForOnPrem($serviceId = null, $massiveChange = false, $
         isset($ret["mc_mod_notifopt_timeperiod"]["mc_mod_notifopt_timeperiod"])
         && $ret["mc_mod_notifopt_timeperiod"]["mc_mod_notifopt_timeperiod"]
     ) {
-        updateServiceNotifOptionTimeperiod($serviceId);
+        updateServiceNotifOptionTimeperiod($serviceId, $parameters);
     } elseif (
         isset($ret["mc_mod_notifopt_timeperiod"]["mc_mod_notifopt_timeperiod"])
         && !$ret["mc_mod_notifopt_timeperiod"]["mc_mod_notifopt_timeperiod"]
     ) {
         updateServiceNotifOptionTimeperiod_MC($serviceId);
     } else {
-        updateServiceNotifOptionTimeperiod($serviceId);
+        updateServiceNotifOptionTimeperiod($serviceId, $parameters);
     }
-
 
     // Function for updating host/hg parent
     // 1 - MC with deletion of existing host/hg parent
@@ -2174,7 +2177,11 @@ function insertServiceTemplateAdditionalOptions(int $serviceId, array $submitted
 
 function insertServiceInDB($submittedValues = [], $onDemandMacro = null)
 {
-    global $isCloudPlatform;
+    global $form, $isCloudPlatform;
+
+    if (! count($submittedValues)) {
+        $submittedValues = $form->getSubmitValues();
+    }
 
     return $isCloudPlatform
         ? insertServiceInDBForCloud($submittedValues, $onDemandMacro)
@@ -2591,6 +2598,7 @@ function insertServiceForOnPremise($submittedValues = [], $onDemandMacro = null)
         ? $rq .= "'" . $submittedValues["service_acknowledgement_timeout"] . "'"
         : $rq .= "NULL";
     $rq .= ")";
+
     $dbResult = $pearDB->query($rq);
     $dbResult = $pearDB->query("SELECT MAX(service_id) FROM service");
     $service_id = $dbResult->fetch();
@@ -3433,7 +3441,7 @@ function updateServiceNotifOptionTimeperiod(int $serviceId, $ret = array())
         $stmt = $pearDB->prepareQuery($request);
         $queryParams['service_id'] = $serviceId;
 
-        $queryParams['timeperiod_tp_id2'] = $ret['timeperiod_tp_id2'] ?? null;
+        $queryParams['timeperiod_tp_id2'] = !empty($ret['timeperiod_tp_id2']) ? $ret['timeperiod_tp_id2'] : null;
 
         $pearDB->executePreparedQuery($stmt, $queryParams);
     } catch (CentreonDbException $exception) {
