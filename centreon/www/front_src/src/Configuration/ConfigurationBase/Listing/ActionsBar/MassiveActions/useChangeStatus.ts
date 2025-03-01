@@ -6,8 +6,8 @@ import { ResponseError, useBulkResponse } from '@centreon/ui';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
-import { configurationAtom } from '../../../../atoms';
 import { useDisable, useEnable } from '../../../api';
+import { configurationAtom } from '../../../atoms';
 import { selectedRowsAtom } from '../../atoms';
 
 import {
@@ -15,6 +15,7 @@ import {
   labelFailedToDisableSomeResources,
   labelFailedToEnableResources,
   labelFailedToEnableSomeResources,
+  labelResourceDisabled,
   labelResourceEnabled
 } from '../../../translatedLabels';
 
@@ -77,7 +78,7 @@ const useChangeStatus = (): UseChangeStatus => {
         data: results,
         labelWarning: t(labelFailedToDisableSomeResources),
         labelFailed: t(labelFailedToDisableResources(labelResourceType)),
-        labelSuccess: t(labelResourceEnabled(labelResourceType)),
+        labelSuccess: t(labelResourceDisabled(labelResourceType)),
         items: selectedRows
       });
 

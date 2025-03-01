@@ -12,8 +12,8 @@ import pluralize from 'pluralize';
 import { equals, isEmpty, pluck } from 'ramda';
 import { useTranslation } from 'react-i18next';
 
-import { configurationAtom } from '../../../atoms';
 import { resourcesToDeleteAtom, selectedRowsAtom } from '../../Listing/atoms';
+import { configurationAtom } from '../../atoms';
 
 import {
   useDeleteOne as useDeleteOneRequest,
@@ -83,6 +83,8 @@ const useDelete = (): UseDeleteState => {
       );
 
       resetSelections();
+
+      return;
     }
 
     handleBulkResponse({
